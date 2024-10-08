@@ -14,6 +14,7 @@ import logging
 import json
 from django.views.decorators.csrf import csrf_exempt
 from .populate import initiate
+from .models import CarMake, CarModel
 
 
 # Get an instance of a logger
@@ -99,3 +100,14 @@ def registration(request):
 # Create a `add_review` view to submit a review
 # def add_review(request):
 # ...
+
+
+from django.http import JsonResponse
+
+def get_cars(request):
+    count = CarMake.objects.filter().count()
+    if count == 0:
+        initiate()  # Call initiate function to populate the database if empty
+    car_models = CarModel.objects.select_related('car_make')
+    cars = [{"CarModel": car_model.name, "CarMake": car_model.car_make.name} for car_model in car_models]
+    return JsonResponse({"CarModels": cars})
